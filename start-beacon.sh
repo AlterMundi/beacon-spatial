@@ -96,6 +96,31 @@ echo "========================================"
 echo "Dir: $PROJECT_DIR"
 echo ""
 
+# --- 0. Refuse to start if another stack is already running ---
+# A second instance cannot bind the OSC/webui ports, but its sclang still
+# registers with the running scsynth and spawns an ORPHAN beacon synth that
+# sounds over the controllable one — the UI then appears dead (observed
+# 2026-09-24). Fail fast instead.
+EXISTING=""
+for port in "$BEACON_OSC_PORT:udp" "57110:udp" "5050:tcp"; do
+    p="${port%:*}"; proto="${port#*:}"
+    if [ "$proto" = "udp" ]; then
+        holder=$(ss -ulnp 2>/dev/null | awk -v P=":$p\$" '$4 ~ P {print}' | head -1)
+    else
+        holder=$(ss -tlnp 2>/dev/null | awk -v P=":$p\$" '$4 ~ P {print}' | head -1)
+    fi
+    [ -n "$holder" ] && EXISTING="$EXISTING\n  $holder"
+done
+if [ -n "$EXISTING" ]; then
+    echo "[ERROR] Another beacon stack appears to be running:" >&2
+    echo -e "$EXISTING" >&2
+    echo "[ERROR] Ports $BEACON_OSC_PORT/57110/5050 in use. Refusing to start a" >&2
+    echo "        second stack (it would spawn an uncontrollable orphan synth)." >&2
+    echo "        Stop the running one first: kill its start-beacon.sh, scsynth," >&2
+    echo "        sclang and webui.py processes, then re-run." >&2
+    exit 3
+fi
+
 SCSYNTH_PID=""
 SCLANG_PID=""
 WEBUI_PID=""
