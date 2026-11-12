@@ -430,7 +430,11 @@ server.doWhenBooted({
       oscdefs = oscdefs.add(
         OSCdef(
           ("beacon_q_" ++ n).asSymbol,
-          { |msg| setControl.value(("q" ++ n).asSymbol, msg[1].asFloat) },
+          { |msg|
+            if (msg[1].isNumber and: { msg[1] >= 0.01 } and: { msg[1] <= 2 }) {
+              setControl.value(("q" ++ n).asSymbol, msg[1].asFloat)
+            }
+          },
           "/beacon/q/" ++ n,
           oscSourceFilter,
           oscListenPort

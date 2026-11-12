@@ -13,7 +13,7 @@ Usage:
 
 from flask import Flask, render_template_string, request, jsonify
 from pythonosc.udp_client import SimpleUDPClient
-import os, json, glob, re, time
+import os, json, glob, re, time, math
 
 app = Flask(__name__)
 osc = SimpleUDPClient(
@@ -337,11 +337,11 @@ HTML = """<!DOCTYPE html>
                     <div>
                         <div class="flex justify-between items-baseline mb-0.5">
                             <span class="control-label">Q (resonance)</span>
-                            <span id="q{{ loop.index }}" class="value-display font-mono text-violet-300 text-sm">{{ band.default_q }}</span>
+                            <span id="vq{{ loop.index }}" class="value-display font-mono text-violet-300 text-sm">{{ band.default_q }}</span>
                         </div>
                         <input type="range" min="0.01" max="2.0" step="0.001" value="{{ band.default_q }}" id="q{{ loop.index }}"
                                class="modern-slider w-full accent-violet-400"
-                               oninput="send('q', {{ loop.index }}, this.value); show(this, 'q{{ loop.index }}')">
+                               oninput="send('q', {{ loop.index }}, this.value); show(this, 'vq{{ loop.index }}')">
                     </div>
                     {% endif %}
                 </div>
@@ -570,6 +570,7 @@ HTML = """<!DOCTYPE html>
         };
 
         function send(param, band, value) {
+            if (!Number.isFinite(parseFloat(value))) return;
             fetch('/control', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -589,7 +590,7 @@ HTML = """<!DOCTYPE html>
         function show(el, id) {
             const unit = id.startsWith('a') ? '°' : '';
             const target = document.getElementById(id);
-            if (target) target.textContent = parseFloat(el.value).toFixed( id.startsWith('q') ? 3 : 2 ) + unit;
+            if (target) target.textContent = parseFloat(el.value).toFixed( id.startsWith('vq') ? 3 : 2 ) + unit;
         }
         
         function updateSpec(band, value) {
@@ -651,7 +652,7 @@ HTML = """<!DOCTYPE html>
                 if (g) { g.value = defaults.gains[i-1]; show(g, 'g'+i); updateSpec(i, g.value); }
                 if (a) { a.value = defaults.azs[i-1]; show(a, 'a'+i); }
                 if (d) { d.value = defaults.dists[i-1]; show(d, 'd'+i); }
-                if (q && defaults.qs[i-1]) { q.value = defaults.qs[i-1]; show(q, 'q'+i); }
+                if (q && defaults.qs[i-1]) { q.value = defaults.qs[i-1]; show(q, 'vq'+i); }
                 if (s && soloState[i-1]) { toggleSolo(i, s); }
             }
             
@@ -682,7 +683,7 @@ HTML = """<!DOCTYPE html>
                     solo: soloState[i-1] 
                 };
                 const q = document.getElementById('q'+i);
-                if (q) b.q = parseFloat(q.value);
+                if (q) { const value = parseFloat(q.value); b.q = Number.isFinite(value) && value >= .01 && value <= 2 ? value : defaults.qs[i-1]; }
                 state.bands.push(b);
             }
             return state;
@@ -700,7 +701,7 @@ HTML = """<!DOCTYPE html>
                 if (g) { g.value = b.gain; send('gain', i, b.gain); show(g, 'g'+i); updateSpec(i, b.gain); }
                 if (a) { a.value = b.az; send('az', i, b.az); show(a, 'a'+i); }
                 if (d) { d.value = b.dist; send('dist', i, b.dist); show(d, 'd'+i); }
-                if (q && b.q !== undefined) { q.value = b.q; send('q', i, b.q); show(q, 'q'+i); }
+                if (q) { const value = Number.isFinite(b.q) && b.q >= .01 && b.q <= 2 ? b.q : defaults.qs[i-1]; q.value = value; send('q', i, value); show(q, 'vq'+i); }
                 if (s && b.solo !== soloState[i-1]) { toggleSolo(i, s); }
             }
             
@@ -1710,11 +1711,32 @@ HTML = """<!DOCTYPE html>
 def index():
     return render_template_string(HTML, bands=BANDS)
 
+def valid_q(address, value):
+    """Invalid saved/browser values must never become zero-width filters."""
+    if not re.fullmatch(r"/beacon/q/(?:[1-9]|1[0-2])", address):
+        return True
+    try:
+        return value is not None and not isinstance(value, bool) and math.isfinite(float(value)) and 0.01 <= float(value) <= 2
+    except (TypeError, ValueError):
+        return False
+
+
+def repair_preset_q(state):
+    """Recover the old duplicate-DOM-ID save bug without altering other controls."""
+    state = json.loads(json.dumps(state))
+    for i, band in enumerate(state.get("bands", [])[:12]):
+        if not valid_q(f"/beacon/q/{i+1}", band.get("q")):
+            band["q"] = BANDS[i]["default_q"]
+    return state
+
+
 @app.route("/control", methods=["POST"])
 def control():
     data = request.get_json()
     addr = data.get("address", "")
     val = data.get("value", 0)
+    if not valid_q(addr, val):
+        return jsonify({"ok": False, "error": "Q must be a finite value between0.01 and2"}), 400
     if addr == "/beacon/record/start":
         label = str(val) if val is not None else "session"
         safe = re.sub(r"[^A-Za-z0-9._-]+", "_", label).strip("_") or "session"
@@ -1751,6 +1773,8 @@ def control_batch():
             continue
         addr = u.get("address", "")
         raw = u.get("value", 0)
+        if not valid_q(addr, raw):
+            continue
         try:
             val = float(raw)
         except (TypeError, ValueError):
@@ -1770,7 +1794,7 @@ def control_batch():
 def save_config():
     data = request.get_json()
     name = data.get("name", "").strip()
-    state = data.get("state", {})
+    state = repair_preset_q(data.get("state", {}))
     if not name:
         return jsonify({"ok": False, "error": "No name"})
     path = os.path.join(CONFIG_DIR, name + ".json")
@@ -1794,7 +1818,7 @@ def load_config():
     if not os.path.exists(path):
         return jsonify({"ok": False, "error": "Not found"})
     with open(path) as f:
-        state = json.load(f)
+        state = repair_preset_q(json.load(f))
     return jsonify({"ok": True, "state": state})
 
 if __name__ == "__main__":

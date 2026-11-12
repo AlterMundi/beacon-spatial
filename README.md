@@ -198,3 +198,9 @@ is 45 times the reference (1818 Hz). Saved controls do not override these center
 After updating, reload the Spatializer engine and UI through its existing scoped
 launcher; snapshot and restore native OSC controls first to preserve active mixes.
 Do not restart the guitar controller or body lab for a Spatializer tuning update.
+
+Preset compatibility: older pages could save null Q values because the display
+and slider shared an HTML ID. Q sliders and labels now have separate IDs;
+legacy null/out-of-range Q values load with the corresponding safe band default.
+Other saved mix/spatial controls are preserved. HTTP and native OSC Q controls
+reject invalid values instead of converting them to a zero-width filter.
