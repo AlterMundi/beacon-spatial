@@ -131,7 +131,7 @@ Replica on **9001** uses the same scheme for N=1..6 only. Full detail: `MEMORY.m
 
 ## Harmonic Lab joint startup
 
-The maintained Weaver checkout provides `python3 scripts/start-harmonic-lab.py`:
+The maintained Weaver checkout provides `scripts/start-live-stack.sh --guitar-lab`:
 Guitar controls plus R24 channel1 through this Spatializer to R24 stereo playback.
 It calls the existing Spatializer launcher with `--live --no-https`, keeps the
 controller's explicit actuation/save controls, and can optionally start the usual
@@ -148,3 +148,8 @@ Component logs retain only their latest1MiB under
 `${XDG_STATE_HOME:-$HOME/.local/state}/beacon-spatial`, or `BEACON_LOG_DIR`.
 No log archive or recorded audio is added. Existing named source channels,
 presets and default audio devices remain separate from this explicit routing.
+
+The launcher selects `scsynth -l32` explicitly: this remains within sclang
+ServerOptions.maxLogins<=32 even on scsynth versions whose default is64.
+The receiving default64 produced a real initial login error before recovery;
+current successful audio/OSC readiness is distinct from that retained error.

@@ -157,8 +157,8 @@ trap 'cleanup 0' INT TERM
 
 # --- 1. scsynth via pw-jack (PipeWire) ---
 echo "[1/3] scsynth via pw-jack (port 57110, 2in/2out)..."
-echo "[INFO] pw-jack scsynth -u 57110 -i 2 -o 2"
-pw-jack scsynth -u 57110 -i 2 -o 2 > >(python3 "$PROJECT_DIR/bounded_log.py" "$LOG_DIR/scsynth.log") 2>&1 &
+echo "[INFO] pw-jack scsynth -u 57110 -i 2 -o 2 -l 32"
+pw-jack scsynth -u 57110 -i 2 -o 2 -l 32 > >(python3 "$PROJECT_DIR/bounded_log.py" "$LOG_DIR/scsynth.log") 2>&1 &
 SCSYNTH_PID=$!
 echo "      -> PID $SCSYNTH_PID (log: $LOG_DIR/scsynth.log)"
 sleep 3
