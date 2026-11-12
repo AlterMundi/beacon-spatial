@@ -1,9 +1,9 @@
 // beacon.scd
 // SuperCollider 3.13 + ATK (Ambisonic Toolkit) 13-band binaural spatializer
-// for the Harmonic Beacon (40Hz guitar harmonic series + high harmonics).
+// for the Harmonic Beacon (40.4Hz guitar harmonic series + high harmonics).
 //
 // PlayBuf (looping harmonic_beacon_2026_05_13_session.wav, mono 48kHz)
-//   -> 12x BPF (Q configurable) + 1x HPF (1800Hz) with per-band gain.lag(0.05)
+//   -> 12x BPF (Q configurable) + 1x HPF (1818Hz) with per-band gain.lag(0.05)
 //   -> per-band FoaPanB (az in radians, distance as 1/dist amp scaling)
 //   -> sum B-format (WXYZ)
 //   -> FoaDecode (Listen kernels, 48000/512) -> wet
@@ -35,9 +35,9 @@
 //           sc3-plugins (for some ATK internals if needed, but core is in ATK)
 //
 // Band layout:
-//   Bands 1-6:  40Hz series, 40Hz bandwidth  [40, 80, 120, 160, 200, 240]
-//   Bands 7-12: 240Hz series, 240Hz bandwidth [480, 720, 960, 1200, 1440, 1680]
-//   Band 13:    HPF 1800Hz+ (no upper limit)
+//   Bands 1-6:  40.4Hz series, 40.4Hz bandwidth [40.4, 80.8, 121.2, 161.6, 202, 242.4]
+//   Bands 7-12: 242.4Hz series, 242.4Hz bandwidth [484.8, 727.2, 969.6, 1212, 1454.4, 1696.8]
+//   Band 13:    HPF 1818Hz+ (no upper limit)
 
 (
 var buf, decoder, synth, oscdefs, helloRoutine, natureBuf, natureSynth;
@@ -95,8 +95,8 @@ if (useFile) {
 server.startAliveThread(0.4);
 server.doWhenBooted({
   // 12 BPF frequencies + HPF cutoff
-  var bpfFreqs = [40, 80, 120, 160, 200, 240, 480, 720, 960, 1200, 1440, 1680, 1800];
-  // RQ defaults: BW=40Hz for 1-6, BW=240Hz for 7-12
+  var bpfFreqs = [40.4, 80.8, 121.2, 161.6, 202, 242.4, 484.8, 727.2, 969.6, 1212, 1454.4, 1696.8, 1818];
+  // RQ defaults: BW=40.4Hz for 1-6, BW=242.4Hz for 7-12
   var defaultRQs = [1.0, 0.5, 1.0/3, 0.25, 0.2, 1.0/6, 0.5, 1.0/3, 0.25, 0.2, 1.0/6, 1.0/7];
   var defaultGains = [1.2, 1.0, 1.0, 1.0, 1.0, 1.3, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
   var defaultAz    = [180, 135, -90, -45, 45, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -138,7 +138,7 @@ server.doWhenBooted({
         ("q" ++ (i + 1)).asSymbol.kr(defaultRQs[i]).lag(0.05)
       };
 
-      // 12x BPF (Q configurable) + 1x HPF (1800Hz, no upper limit)
+      // 12x BPF (Q configurable) + 1x HPF (1818Hz, no upper limit)
       var bpfs = bpfFreqs.collect { |freq, i|
         var sig;
         if (i == 12) {
@@ -609,9 +609,9 @@ server.doWhenBooted({
   "  BEACON READY                          ".postln;
   "  OSC %:% | scsynth 127.0.0.1:57110".format(oscListenHost, oscListenPort).postln;
   "========================================".postln;
-  "Bands 1-6 : [ 40, 80, 120, 160, 200, 240 ] Hz (40Hz BW)".postln;
-  "Bands 7-12: [ 480, 720, 960, 1200, 1440, 1680 ] Hz (240Hz BW)".postln;
-  "Band 13   : HPF 1800Hz+".postln;
+  "Bands 1-6 : [ 40.4, 80.8, 121.2, 161.6, 202, 242.4 ] Hz (40.4Hz BW)".postln;
+  "Bands 7-12: [ 484.8, 727.2, 969.6, 1212, 1454.4, 1696.8 ] Hz (242.4Hz BW)".postln;
+  "Band 13   : HPF 1818Hz+".postln;
   "Initial gains: %   (0-3)".format(defaultGains).postln;
   "Initial az:    % deg (-180..180)".format(defaultAz).postln;
   "Initial dist:  %   (0-10)".format(defaultDist).postln;

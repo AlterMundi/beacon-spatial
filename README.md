@@ -1,8 +1,8 @@
 # Harmonic Beacon Spatializer
 
-13-band binaural spatializer for the Harmonic Beacon (40 Hz natural harmonic series). Each band has independent gain, azimuth, distance, and (for BPF bands) Q, rendered over headphones via ATK HRTF.
+13-band binaural spatializer for the Harmonic Beacon (40.4 Hz natural harmonic series). Each band has independent gain, azimuth, distance, and (for BPF bands) Q, rendered over headphones via ATK HRTF.
 
-**Current engine:** SuperCollider (`beacon.scd`) — 12 BPF + 1 HPF @ 1800 Hz, ATK `FoaPanB` / `FoaDecode` with Listen kernels @ 48 kHz, plus a native looping mono/stereo nature-WAV layer. OSC control on port **57120**. Flask web UI on **:5050**.
+**Current engine:** SuperCollider (`beacon.scd`) — 12 BPF + 1 HPF @ 1818 Hz, ATK `FoaPanB` / `FoaDecode` with Listen kernels @ 48 kHz, plus a native looping mono/stereo nature-WAV layer. OSC control on port **57120**. Flask web UI on **:5050**.
 
 ## Quick Start
 
@@ -76,7 +76,7 @@ sclang (beacon.scd) — OSCdef → synth.set
     v
 scsynth -u 57110 via pw-jack
     |
-    | source → 12× BPF + HPF@1800 → solo → dry Mix*(1-mix)
+    | source → 12× BPF + HPF@1818 → solo → dry Mix*(1-mix)
     |                              → wet FoaPanB(az,1/dist) → FoaDecode(Listen)
     | → (wet+dry)*master → Out.ar(0, 2)
     | nature WAV → sample_player(gain, release) ───────────→ Out.ar(0, 2)
@@ -117,9 +117,9 @@ Replica on **9001** uses the same scheme for N=1..6 only. Full detail: `MEMORY.m
 
 | Band | Freq | Type |
 |------|------|------|
-| 1–6 | 40 / 80 / 120 / 160 / 200 / 240 Hz | BPF (40 Hz bandwidth) |
-| 7–12 | 480 / 720 / 960 / 1200 / 1440 / 1680 Hz | BPF (240 Hz bandwidth) |
-| 13 | 1800+ Hz | HPF |
+| 1–6 | 40.4 / 80.8 / 121.2 / 161.6 / 202 / 242.4 Hz | BPF (40.4 Hz bandwidth) |
+| 7–12 | 484.8 / 727.2 / 969.6 / 1212 / 1454.4 / 1696.8 Hz | BPF (240.4 Hz bandwidth) |
+| 13 | 1818+ Hz | HPF |
 
 ## Important
 
@@ -190,3 +190,11 @@ and installation record are maintained in harmonic-weaver's MACOS guide.
 Native device command reference:
 https://doc.sccode.org/Reference/Server-Architecture.html ;
 https://doc.sccode.org/Reference/AudioDeviceSelection.html .
+
+The laboratory reference is 40.4 Hz, matching the tuned guitar and Shaper.
+Band indices, gains, spatial controls and RQ presets remain compatible; unchanged
+RQ values scale absolute bandwidth with the new centers. The high-pass crossover
+is 45 times the reference (1818 Hz). Saved controls do not override these centers.
+After updating, reload the Spatializer engine and UI through its existing scoped
+launcher; snapshot and restore native OSC controls first to preserve active mixes.
+Do not restart the guitar controller or body lab for a Spatializer tuning update.

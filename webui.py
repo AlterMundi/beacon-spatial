@@ -29,19 +29,19 @@ os.makedirs(CONFIG_DIR, exist_ok=True)
 os.makedirs(RECORD_DIR, exist_ok=True)
 
 BANDS = [
-    {"freq": 40,   "color": "#c0392b", "default_gain": 1.2, "default_az": 180, "default_dist": 2.0, "default_q": 1.0,   "default_solo": 0},
-    {"freq": 80,   "color": "#e67e22", "default_gain": 1.0, "default_az": 135, "default_dist": 2.5, "default_q": 0.5,   "default_solo": 0},
-    {"freq": 120,  "color": "#f1c40f", "default_gain": 1.0, "default_az": -90, "default_dist": 3.0, "default_q": 0.333, "default_solo": 0},
-    {"freq": 160,  "color": "#2ecc71", "default_gain": 1.0, "default_az": -45, "default_dist": 2.5, "default_q": 0.25,  "default_solo": 0},
-    {"freq": 200,  "color": "#1abc9c", "default_gain": 1.0, "default_az": 45,  "default_dist": 2.0, "default_q": 0.2,   "default_solo": 0},
-    {"freq": 240,  "color": "#3498db", "default_gain": 1.3, "default_az": 0,   "default_dist": 1.5, "default_q": 0.167, "default_solo": 0},
-    {"freq": 480,  "color": "#2980b9", "default_gain": 1.0, "default_az": 0,   "default_dist": 2.0, "default_q": 0.5,   "default_solo": 0},
-    {"freq": 720,  "color": "#8e44ad", "default_gain": 1.0, "default_az": 0,   "default_dist": 2.0, "default_q": 0.333, "default_solo": 0},
-    {"freq": 960,  "color": "#9b59b6", "default_gain": 1.0, "default_az": 0,   "default_dist": 2.0, "default_q": 0.25,  "default_solo": 0},
-    {"freq": 1200, "color": "#e84393", "default_gain": 1.0, "default_az": 0,   "default_dist": 2.0, "default_q": 0.2,   "default_solo": 0},
-    {"freq": 1440, "color": "#fd79a8", "default_gain": 1.0, "default_az": 0,   "default_dist": 2.0, "default_q": 0.167, "default_solo": 0},
-    {"freq": 1680, "color": "#a29bfe", "default_gain": 1.0, "default_az": 0,   "default_dist": 2.0, "default_q": 0.143, "default_solo": 0},
-    {"freq": "1800+", "color": "#dfe6e9", "default_gain": 1.0, "default_az": 0,   "default_dist": 2.0, "default_solo": 0},
+    {"freq": 40.4,   "color": "#c0392b", "default_gain": 1.2, "default_az": 180, "default_dist": 2.0, "default_q": 1.0,   "default_solo": 0},
+    {"freq": 80.8,   "color": "#e67e22", "default_gain": 1.0, "default_az": 135, "default_dist": 2.5, "default_q": 0.5,   "default_solo": 0},
+    {"freq": 121.2,  "color": "#f1c40f", "default_gain": 1.0, "default_az": -90, "default_dist": 3.0, "default_q": 0.333, "default_solo": 0},
+    {"freq": 161.6,  "color": "#2ecc71", "default_gain": 1.0, "default_az": -45, "default_dist": 2.5, "default_q": 0.25,  "default_solo": 0},
+    {"freq": 202,  "color": "#1abc9c", "default_gain": 1.0, "default_az": 45,  "default_dist": 2.0, "default_q": 0.2,   "default_solo": 0},
+    {"freq": 242.4,  "color": "#3498db", "default_gain": 1.3, "default_az": 0,   "default_dist": 1.5, "default_q": 0.167, "default_solo": 0},
+    {"freq": 484.8,  "color": "#2980b9", "default_gain": 1.0, "default_az": 0,   "default_dist": 2.0, "default_q": 0.5,   "default_solo": 0},
+    {"freq": 727.2,  "color": "#8e44ad", "default_gain": 1.0, "default_az": 0,   "default_dist": 2.0, "default_q": 0.333, "default_solo": 0},
+    {"freq": 969.6,  "color": "#9b59b6", "default_gain": 1.0, "default_az": 0,   "default_dist": 2.0, "default_q": 0.25,  "default_solo": 0},
+    {"freq": 1212, "color": "#e84393", "default_gain": 1.0, "default_az": 0,   "default_dist": 2.0, "default_q": 0.2,   "default_solo": 0},
+    {"freq": 1454.4, "color": "#fd79a8", "default_gain": 1.0, "default_az": 0,   "default_dist": 2.0, "default_q": 0.167, "default_solo": 0},
+    {"freq": 1696.8, "color": "#a29bfe", "default_gain": 1.0, "default_az": 0,   "default_dist": 2.0, "default_q": 0.143, "default_solo": 0},
+    {"freq": "1818+", "color": "#dfe6e9", "default_gain": 1.0, "default_az": 0,   "default_dist": 2.0, "default_solo": 0},
 ]
 
 HTML = """<!DOCTYPE html>
@@ -195,7 +195,7 @@ HTML = """<!DOCTYPE html>
                     </div>
                 </div>
                 <div class="hidden sm:block text-xs px-2.5 py-1 rounded-full bg-slate-900 border border-slate-800 text-slate-400">
-                    13-band • 40Hz series
+                    13-band • 40.4Hz series
                 </div>
             </div>
 
