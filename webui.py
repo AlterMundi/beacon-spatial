@@ -1806,4 +1806,4 @@ if __name__ == "__main__":
     print("=" * 50)
     # threaded=True so concurrent sensor-batch POSTs don't serialize
     # behind each other on the Werkzeug dev server's main request loop.
-    app.run(host="0.0.0.0", port=5050, debug=False, threaded=True)
+    app.run(host=os.environ.get("BEACON_WEB_HOST", "0.0.0.0"), port=5050, debug=False, threaded=True)

@@ -153,3 +153,40 @@ The launcher selects `scsynth -l32` explicitly: this remains within sclang
 ServerOptions.maxLogins<=32 even on scsynth versions whose default is64.
 The receiving default64 produced a real initial login error before recovery;
 current successful audio/OSC readiness is distinct from that retained error.
+
+## macOS receiving route (implementation pending native acceptance)
+
+`start-beacon.sh` dispatches to the CoreAudio companion on macOS. It reuses the
+same `beacon.scd`, native OSC contract and web UI; it does not invoke PipeWire,
+ALSA, `ss`, or Linux `script -c`. Select exact native audio device names first:
+
+```sh
+export BEACON_INPUT_DEVICE='Exact CoreAudio input name'
+export BEACON_OUTPUT_DEVICE='Exact CoreAudio output name'
+./start-beacon.sh --live --no-https
+```
+
+The names above are placeholders, never a claim about the receiving hardware.
+SuperCollider can be on PATH or in its ordinary `/Applications` bundle;
+`BEACON_SCLANG` and `BEACON_SCSYNTH` select existing binaries explicitly. Reuse
+`venv`/`.venv` with the repository requirements, installed ATK/sc3 plugins and
+kernels. A missing device selection or environment fails without choosing a
+webcam/system microphone. The native runner is bounded to8h, uses the same
+1MiB latest-tail logger and terminates only process groups it created.
+
+`BEACON_AUDIO_FILE` selects an existing WAV for `--file`; the default is now
+relative to `beacon.scd` rather than a developer's home directory. File mode
+requests zero hardware input channels. No sample/model/archive is downloaded.
+`python3 beacon_macos.py --describe` validates configuration and prints planned
+commands without launching audio. It does not establish actual device support.
+
+The native UI binds loopback. There is no public tunnel in this native path;
+phone sensor HTTPS delivery is a separate existing integration. Camera/audio
+permissions and real input/output require receiving tests, not Linux fixtures.
+Native code and lifecycle plans are unit-tested; Mac audio, ATK availability,
+latency and human listening are not yet qualified. The full lab's macOS route
+and installation record are maintained in harmonic-weaver's MACOS guide.
+
+Native device command reference:
+https://doc.sccode.org/Reference/Server-Architecture.html ;
+https://doc.sccode.org/Reference/AudioDeviceSelection.html .

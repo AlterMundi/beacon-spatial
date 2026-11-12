@@ -35,6 +35,10 @@ BEACON_OUTPUT_TARGET="${BEACON_OUTPUT_TARGET:-both}"
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$PROJECT_DIR"
 
+if [ "$(uname -s)" = Darwin ]; then
+    exec python3 "$PROJECT_DIR/beacon_macos.py" "$@"
+fi
+
 # Parse args. Environment values are defaults so existing deployments can
 # configure the listener without changing their launcher invocation.
 BEACON_SOURCE="live"

@@ -41,7 +41,7 @@
 
 (
 var buf, decoder, synth, oscdefs, helloRoutine, natureBuf, natureSynth;
-var audioFilePath = "/home/nicolas/Projects/beacon-spatial/harmonic_beacon_2026_05_13_session.wav";
+var audioFilePath = "BEACON_AUDIO_FILE".getenv ? (PathName(thisProcess.nowExecutingPath).pathOnly +/+ "harmonic_beacon_2026_05_13_session.wav");
 var useFile = "BEACON_SOURCE".getenv == "file";
 var defName = if (useFile) { \beacon_file } { \beacon_live };
 var contractId = "eaad56d9081d01c4a63646e0055b37b7";
