@@ -128,3 +128,23 @@ Replica on **9001** uses the same scheme for N=1..6 only. Full detail: `MEMORY.m
 - Use `pw-jack scsynth`, not a bare `jackd` session (PipeWire exclusive-mode conflicts).
 - sclang must run with a pseudo-TTY (`script` in the launcher); plain daemon mode exits.
 - Phone sensors need HTTPS (auto-tunnel) or a secure origin.
+
+## Harmonic Lab joint startup
+
+The maintained Weaver checkout provides `python3 scripts/start-harmonic-lab.py`:
+Guitar controls plus R24 channel1 through this Spatializer to R24 stereo playback.
+It calls the existing Spatializer launcher with `--live --no-https`, keeps the
+controller's explicit actuation/save controls, and can optionally start the usual
+Weaver/Shaper/HarMoCAP laboratory. It creates no new App or account/transport.
+
+`BEACON_OUTPUT_TARGET=r24|internal|both` selects the existing launcher's output
+(default `both` preserves standalone behavior; the joint lab chooses `r24`).
+`beacon_routes.py` changes only this SuperCollider client's links and verifies
+CH1 input and the chosen outputs. A missing R24 fails rather than using a webcam
+or built-in microphone. `beacon_routes.py --output r24 --check` only observes.
+The old generic "connected" print did not establish actual JACK links.
+
+Component logs retain only their latest1MiB under
+`${XDG_STATE_HOME:-$HOME/.local/state}/beacon-spatial`, or `BEACON_LOG_DIR`.
+No log archive or recorded audio is added. Existing named source channels,
+presets and default audio devices remain separate from this explicit routing.
