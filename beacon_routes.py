@@ -1,6 +1,7 @@
 """Select and verify only the Spatializer's own JACK links; never change defaults."""
 import argparse
 import json
+import os
 import subprocess
 
 INPUT = 'R24 Analog Surround 7.1:capture_FL'
@@ -18,6 +19,11 @@ def graph(run=subprocess.run):
     return links
 
 def desired(output):
+    selected=[os.environ.get(key) for key in ('BEACON_INPUT_PORT','BEACON_OUTPUT_LEFT','BEACON_OUTPUT_RIGHT')]
+    if any(selected):
+        if not all(selected) or any(len(value)>512 or '\n' in value for value in selected):
+            raise ValueError('Select one exact JACK input and both output ports')
+        return [(selected[0],'SuperCollider:in_1'),('SuperCollider:out_1',selected[1]),('SuperCollider:out_2',selected[2])]
     pairs = [(INPUT, 'SuperCollider:in_1')]
     for name in OUTPUTS[output]:
         pairs += [('SuperCollider:out_1', name + ':playback_FL'),

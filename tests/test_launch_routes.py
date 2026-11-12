@@ -40,3 +40,15 @@ class RoutesTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             p=Path(td)/'log';copy_tail(io.BytesIO(b'a'*20000+b'z'*30),p,limit=1000)
             self.assertEqual(p.stat().st_size,1000);self.assertTrue(p.read_bytes().endswith(b'z'*30))
+
+class SelectedPortsTests(unittest.TestCase):
+    def test_exact_receiving_ports_do_not_require_r24(self):
+        from unittest.mock import patch
+        from beacon_routes import desired
+        with patch.dict('os.environ',{'BEACON_INPUT_PORT':'Interface:input_2','BEACON_OUTPUT_LEFT':'Headphones:left','BEACON_OUTPUT_RIGHT':'Headphones:right'}):
+            self.assertEqual(desired('r24'),[('Interface:input_2','SuperCollider:in_1'),('SuperCollider:out_1','Headphones:left'),('SuperCollider:out_2','Headphones:right')])
+    def test_incomplete_receiving_selection_refuses_before_any_graph_write(self):
+        from unittest.mock import patch
+        from beacon_routes import desired
+        with patch.dict('os.environ',{'BEACON_INPUT_PORT':'Interface:input_2'},clear=True):
+            with self.assertRaises(ValueError):desired('r24')
