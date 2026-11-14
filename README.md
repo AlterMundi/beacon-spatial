@@ -204,3 +204,16 @@ and slider shared an HTML ID. Q sliders and labels now have separate IDs;
 legacy null/out-of-range Q values load with the corresponding safe band default.
 Other saved mix/spatial controls are preserved. HTTP and native OSC Q controls
 reject invalid values instead of converting them to a zero-width filter.
+
+### Clean microphone alongside the guitar
+
+On the selected JACK receiver, `BEACON_VOICE_INPUT_PORT` can name an exact
+separate microphone capture port. The receiving route writer connects it directly
+to both selected playback channels, alongside the Spatializer/Shaper outputs.
+It never sends this microphone through the13-band filters or changes their mix,
+and preserves other microphone consumers. R24 channel2 is capture_FR; channel1
+remains the filtered guitar. Set microphone level using the R24 input2 preamp.
+Omitting this option adds no microphone route. Missing/wrong selected ports fail
+before graph mutation; check-only verifies both clean links without creating them.
+Manual removal uses jack_disconnect for only those two selected microphone links;
+it must not change guitar, Shaper or unrelated applications. No recording is added.

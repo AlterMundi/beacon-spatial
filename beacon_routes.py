@@ -32,12 +32,19 @@ def desired(output):
 
 def configure(output, *, check_only=False, run=subprocess.run):
     links = graph(run); pairs = desired(output)
+    voice = os.environ.get('BEACON_VOICE_INPUT_PORT','')
+    if voice and (len(voice)>512 or '\n' in voice or voice==pairs[0][0]):
+        raise ValueError('Select a distinct exact voice input port')
+    # A separate clean mono path to each selected output, outside all SC filters.
+    voice_pairs = [(voice,b) for a,b in pairs if a.startswith('SuperCollider:out_')] if voice else []
+    pairs += voice_pairs
     own = ('SuperCollider:in_1', 'SuperCollider:in_2', 'SuperCollider:out_1', 'SuperCollider:out_2')
     expected = {p: set() for p in own}
     for a,b in pairs:
         if a not in links or b not in links:
             raise RuntimeError('Audio port unavailable: ' + (a if a not in links else b))
-        expected[a if a in expected else b].add(b if a in expected else a)
+        if a in expected or b in expected:
+            expected[a if a in expected else b].add(b if a in expected else a)
     for port in own:
         if port not in links:
             raise RuntimeError('Audio port unavailable: ' + port)
@@ -49,9 +56,9 @@ def configure(output, *, check_only=False, run=subprocess.run):
             if b not in links[a]:
                 run(['pw-jack', 'jack_connect', a, b], check=True, capture_output=True, timeout=3)
         links = graph(run)
-    if any(links[port] != peers for port,peers in expected.items()):
+    if any(b not in links[a] for a,b in pairs) or any(links[port] != peers for port,peers in expected.items()):
         raise RuntimeError('Spatializer audio links do not match the selected input/output')
-    return {'input':'R24 channel1', 'output':output, 'verified_links':pairs}
+    return {'input':'R24 channel1', 'output':output, 'verified_links':pairs, 'voice_input':voice or None, 'voice_filtered':False if voice else None}
 
 if __name__ == '__main__':
     parser=argparse.ArgumentParser();parser.add_argument('--output',choices=OUTPUTS,default='r24');parser.add_argument('--check',action='store_true');args=parser.parse_args()

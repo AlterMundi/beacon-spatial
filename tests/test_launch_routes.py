@@ -52,3 +52,24 @@ class SelectedPortsTests(unittest.TestCase):
         from beacon_routes import desired
         with patch.dict('os.environ',{'BEACON_INPUT_PORT':'Interface:input_2'},clear=True):
             with self.assertRaises(ValueError):desired('r24')
+
+class CleanVoiceTests(unittest.TestCase):
+    model = RoutesTests.model
+    def test_voice_bypasses_filters_and_preserves_other_consumers(self):
+        from unittest.mock import patch
+        g,calls,run=self.model();voice='R24 Analog Surround 7.1:capture_FR'
+        g[voice]={'other:app'};g['other:app'].add(voice)
+        with patch.dict('os.environ',{'BEACON_VOICE_INPUT_PORT':voice}):
+            result=configure('r24',run=run)
+            self.assertEqual(g['SuperCollider:in_1'],{INPUT})
+            self.assertEqual(g['SuperCollider:in_2'],set())
+            self.assertTrue({'R24 Analog Stereo:playback_FL','R24 Analog Stereo:playback_FR','other:app'} <= g[voice])
+            self.assertFalse(result['voice_filtered'])
+            calls.clear();configure('r24',check_only=True,run=run)
+            self.assertTrue(all(c[1]=='jack_lsp' for c in calls))
+    def test_missing_voice_is_not_replaced_by_another_channel(self):
+        from unittest.mock import patch
+        g,calls,run=self.model()
+        with patch.dict('os.environ',{'BEACON_VOICE_INPUT_PORT':'missing:voice'}):
+            with self.assertRaises(RuntimeError):configure('r24',run=run)
+        self.assertEqual(len(calls),1)
